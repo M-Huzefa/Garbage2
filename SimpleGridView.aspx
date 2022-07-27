@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Task2.aspx.cs" Inherits="GridView.Task2" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="SimpleGridView.aspx.cs" Inherits="GridView1.SimpleGridView" %>
 
 <!DOCTYPE html>
 
@@ -11,14 +11,7 @@
         <div>
             <asp:GridView ID="StudentGridData" runat="server" BackColor="White" BorderColor="#E7E7FF"
                 BorderStyle="None" BorderWidth="1px" CellPadding="3" Font-Names="Calibri" Font-Size="Larger"
-                AllowPaging="true" PageSize="5" OnPageIndexChanging="PageIndexChanging"
-                OnRowEditing="RowEditing" OnRowCancelingEdit="RowCancelingEdit"
-                AutoGenerateEditButton="True" OnRowDeleting="RowDeleted"> <%--OnRowUpdating ="RowUpdating"--%>     
-                <%--OnRowCancelingEdit="TaskGridView_RowCancelingEdit" >--%>
-                
-                <Columns>
-                    <asp:CommandField HeaderText="Commands" ShowDeleteButton="true"/>
-                </Columns>
+                GridLines="Horizontal">
 
                 <AlternatingRowStyle BackColor="#F7F7F7" />
 
@@ -39,9 +32,8 @@
                 <SortedDescendingCellStyle BackColor="#D8D8F0" />
 
                 <SortedDescendingHeaderStyle BackColor="#3E3277" />
-                
+
             </asp:GridView>
-            
         </div>
     </form>
 </body>
