@@ -35,16 +35,17 @@ namespace GridView
         public List<Student> ListGenerator()
         {
             List<Student> studentDetail = new List<Student>();
-            studentDetail.Add(new Student(1, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(2, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(3, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(4, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(5, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(6, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(7, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(8, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(9, "huzefa", "main bazar"));
-            studentDetail.Add(new Student(10, "huzefa", "main bazar"));
+            
+            string[] names = { "huzefa", "HMH", "Huz", "Daim", "Junaid", "Dry", "Ahmad", "Jinnah", "Ahsan", "Ali" };
+            string[] addresses = { "faisalabad", "main bazar", "madni town", "lahore", "gujrat", "gujranwala", "samanabad", "lalamusa", "islamabad", "sadiqabad" };
+            
+            Random random = new Random();
+
+            for(int count = 0; count < 10; count++)
+            {
+                //string rollNo = count.ToString() + random.Next(1, 100).ToString();
+                studentDetail.Add(new Student(Convert.ToInt32((count+1).ToString() + random.Next(1, 100).ToString()), names[count], addresses[count]));
+            }
             return studentDetail;
         }
     }
