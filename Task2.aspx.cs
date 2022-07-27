@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -20,7 +20,7 @@ namespace GridView
         }
 
         void BindData()
-        { 
+        {
             // Set the data source and bind to the Data Grid control.
             StudentGridData.DataSource = Session["Detail"];
             StudentGridData.DataBind();
@@ -28,7 +28,11 @@ namespace GridView
 
         protected void PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
+            //Set the Page index.
+            Session["pageSize"] = (StudentGridData.PageSize);
+            Session["newPage"] = (e.NewPageIndex);
             StudentGridData.PageIndex = e.NewPageIndex;
+
             //Bind data to the GridView control.
             BindData();
         }
@@ -37,6 +41,7 @@ namespace GridView
         {
             //Set the edit index.
             StudentGridData.EditIndex = e.NewEditIndex;
+
             //Bind data to the GridView control.
             BindData();
         }
@@ -45,17 +50,19 @@ namespace GridView
         {
             //Reset the edit index.
             StudentGridData.EditIndex = -1;
+
             //Bind data to the GridView control.
             BindData();
         }
 
         protected void RowDeleted(Object sender, GridViewDeleteEventArgs e)
         {
-            //Retrieve the table from the session object.
+            //Retrieve the table from the session object. 
             List<Student> removeList = (List<Student>)Session["Detail"];
 
-            //removeList the selected row
-            removeList.RemoveAt(e.RowIndex);
+            //remove the selected row
+            removeList.RemoveAt(Convert.ToInt32(Session["pageSize"])*Convert.ToInt32(Session["newPage"]) + e.RowIndex);
+            
             Session["Detail"] = removeList;
             BindData();
         }
@@ -66,10 +73,15 @@ namespace GridView
             List<Student> updatelist = (List<Student>)Session["Detail"];
 
             //Update the values.
-            GridViewRow row = StudentGridData.Rows[e.RowIndex];
-            //updatelist[e.RowIndex.DataItemIndex] .Rows[row.DataItemIndex]["Id"] = ((TextBox)(row.Cells[1].Controls[0])).Text;
-            //updatelist.Rows[row.DataItemIndex]["Description"] = ((TextBox)(row.Cells[2].Controls[0])).Text;
-            //updatelist.Rows[row.DataItemIndex]["IsComplete"] = ((CheckBox)(row.Cells[3].Controls[0])).Checked;
+            Student updatingRow = updatelist[Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + e.RowIndex];
+            updatingRow.ID = Convert.ToInt32(e.NewValues["ID"]);
+            updatingRow.RollNo = Convert.ToInt32(e.NewValues["RollNo"]);
+            updatingRow.Name = e.NewValues["Name"].ToString();
+            updatingRow.Salary = e.NewValues["Salary"].ToString();
+            updatingRow.Address = e.NewValues["Address"].ToString();
+            
+            Session["Detail"] = updatelist;
+            label.Text = "Row has been updated";
 
             //Reset the edit index.
             StudentGridData.EditIndex = -1;
@@ -77,7 +89,27 @@ namespace GridView
             //Bind data to the GridView control.
             BindData();
         }
+
+        protected void RowSelecting(object sender, EventArgs e)
+        {
+            int sel = StudentGridData.selec;
+        }
+
+        //protected void RowCreated(Object sender, GridViewCommandEventArgs e)
+        //{
+        //    List<Student> insertRow = (List<Student>)Session["Detail"];
+        //    Student creatingRow = insertRow[Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + Convert.ToInt32(e.CommandArgument)];
+        //    creatingRow.ID = Convert.ToInt32(e.CommandSource);
+        //    Session["Detail"] = creatingRow;
+
+        //    //Reset the edit index.
+        //    StudentGridData.EditIndex = -1;
+
+        //    //Bind data to the GridView control.
+        //    BindData();
+        //}
     }
+
     class Student
     {
         public int ID { get; set; }
@@ -107,7 +139,7 @@ namespace GridView
                 //string rollNo = count.ToString() + random.Next(1, 100).ToString();
                 studentDetail.Add(new Student(Convert.ToInt32((count + 1).ToString() + random.Next(1, 100).ToString()), Convert.ToInt32((count).ToString() + random.Next(101, 200).ToString()), names[count], "$" + random.Next(3000, 7000).ToString(), addresses[count]));
             }
-            
+
             return studentDetail;
         }
     }
