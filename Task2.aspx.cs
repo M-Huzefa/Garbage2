@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,25 +13,27 @@ namespace GridView
         {
             if (!IsPostBack)
             {
-                List<Student> studentList = new Student().ListGenerator();
-                Session["Detail"] = studentList;
+                List<Staff> StaffList = new Staff().ListGenerator();
+                Session["Detail"] = StaffList;
+                Session["pageSize"] = (StaffGridData.PageSize);
                 BindData();
             }
+
+            Session["newPage"] = StaffGridData.PageIndex;
         }
 
         void BindData()
         {
             // Set the data source and bind to the Data Grid control.
-            StudentGridData.DataSource = Session["Detail"];
-            StudentGridData.DataBind();
+            StaffGridData.DataSource = Session["Detail"];
+            StaffGridData.DataBind();
         }
 
         protected void PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             //Set the Page index.
-            Session["pageSize"] = (StudentGridData.PageSize);
             Session["newPage"] = (e.NewPageIndex);
-            StudentGridData.PageIndex = e.NewPageIndex;
+            StaffGridData.PageIndex = e.NewPageIndex;
 
             //Bind data to the GridView control.
             BindData();
@@ -40,7 +42,7 @@ namespace GridView
         protected void RowEditing(object sender, GridViewEditEventArgs e)
         {
             //Set the edit index.
-            StudentGridData.EditIndex = e.NewEditIndex;
+            StaffGridData.EditIndex = e.NewEditIndex;
 
             //Bind data to the GridView control.
             BindData();
@@ -49,7 +51,7 @@ namespace GridView
         protected void RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
             //Reset the edit index.
-            StudentGridData.EditIndex = -1;
+            StaffGridData.EditIndex = -1;
 
             //Bind data to the GridView control.
             BindData();
@@ -58,59 +60,78 @@ namespace GridView
         protected void RowDeleted(Object sender, GridViewDeleteEventArgs e)
         {
             //Retrieve the table from the session object. 
-            List<Student> removeList = (List<Student>)Session["Detail"];
+            List<Staff> removeList = (List<Staff>)Session["Detail"];
 
             //remove the selected row
-            removeList.RemoveAt(Convert.ToInt32(Session["pageSize"])*Convert.ToInt32(Session["newPage"]) + e.RowIndex);
-            
+            removeList.RemoveAt(Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + e.RowIndex);
+
             Session["Detail"] = removeList;
+
+            //Bind data to the GridView control.
             BindData();
+
+            label.Text = "Row has been deleted";
         }
 
         protected void RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             //Retrieve the table from the session object.
-            List<Student> updatelist = (List<Student>)Session["Detail"];
+            List<Staff> updatelist = (List<Staff>)Session["Detail"];
 
             //Update the values.
-            Student updatingRow = updatelist[Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + e.RowIndex];
+            Staff updatingRow = updatelist[Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + e.RowIndex];
             updatingRow.ID = Convert.ToInt32(e.NewValues["ID"]);
             updatingRow.RollNo = Convert.ToInt32(e.NewValues["RollNo"]);
             updatingRow.Name = e.NewValues["Name"].ToString();
             updatingRow.Salary = e.NewValues["Salary"].ToString();
             updatingRow.Address = e.NewValues["Address"].ToString();
-            
-            Session["Detail"] = updatelist;
-            label.Text = "Row has been updated";
 
+            Session["Detail"] = updatelist;
+            
             //Reset the edit index.
-            StudentGridData.EditIndex = -1;
+            StaffGridData.EditIndex = -1;
 
             //Bind data to the GridView control.
             BindData();
+
+            label.Text = "Row has been updated";
         }
 
-        protected void RowSelecting(object sender, EventArgs e)
+        protected void onselectedindexchanging(Object sender, GridViewSelectEventArgs e)
         {
-            int sel = StudentGridData.selec;
+            //Retrieve the table from the session object.
+            List<Staff> newRow = (List<Staff>)Session["Detail"];
+
+            Staff selectedRow = newRow[Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + e.NewSelectedIndex];
+
+            Session["selectedRow"] = selectedRow;
+
+            Response.Redirect("SelectedStaffDetail.aspx");
+
         }
 
-        //protected void RowCreated(Object sender, GridViewCommandEventArgs e)
-        //{
-        //    List<Student> insertRow = (List<Student>)Session["Detail"];
-        //    Student creatingRow = insertRow[Convert.ToInt32(Session["pageSize"]) * Convert.ToInt32(Session["newPage"]) + Convert.ToInt32(e.CommandArgument)];
-        //    creatingRow.ID = Convert.ToInt32(e.CommandSource);
-        //    Session["Detail"] = creatingRow;
+        protected void SearchResults(object sender, EventArgs e)
+        {
+            //Searches for all the objects where the name matches query & displays them on new page 
 
-        //    //Reset the edit index.
-        //    StudentGridData.EditIndex = -1;
+            string query = textbox.Text;
+            List<Staff> searchResults = new List<Staff> { new Staff() };
+            List<Staff> list = (List<Staff>)Session["Detail"];
 
-        //    //Bind data to the GridView control.
-        //    BindData();
-        //}
+            foreach (Staff obj in list)
+            {
+                if (obj.Name == query)
+                {
+                    searchResults.Add(obj);
+                }
+            }
+
+            Session["search"] = searchResults;
+            Response.Redirect("SearchResults.aspx");
+        }
     }
 
-    class Student
+    class Staff
     {
         public int ID { get; set; }
         public int RollNo { get; set; }
@@ -118,9 +139,9 @@ namespace GridView
         public string Salary { get; set; }
         public string Address { get; set; }
 
-        public Student() { }
+        public Staff() { }
 
-        public Student(int id, int rollNo, string name, string salary, string address)
+        public Staff(int id, int rollNo, string name, string salary, string address)
         {
             ID = id;
             RollNo = rollNo;
@@ -128,19 +149,19 @@ namespace GridView
             Salary = salary;
             Address = address;
         }
-        public List<Student> ListGenerator()
+        public List<Staff> ListGenerator()
         {
-            List<Student> studentDetail = new List<Student>();
+            List<Staff> StaffDetail = new List<Staff>();
             string[] names = { "huzefa", "HMH", "Huz", "Daim", "Junaid", "Dry", "Ahmad", "Jinnah", "Ahsan", "Ali", "huzefa", "HMH", "Huz", "Daim", "Junaid", "Dry", "Ahmad", "Jinnah", "Ahsan", "Ali", "huzefa", "HMH", "Huz", "Daim", "Junaid", "Dry", "Ahmad", "Jinnah", "Ahsan", "Ali" };
             string[] addresses = { "faisalabad", "main bazar", "madni town", "lahore", "gujrat", "gujranwala", "samanabad", "lalamusa", "islamabad", "sadiqabad", "faisalabad", "main bazar", "madni town", "lahore", "gujrat", "gujranwala", "samanabad", "lalamusa", "islamabad", "sadiqabad", "faisalabad", "main bazar", "madni town", "lahore", "gujrat", "gujranwala", "samanabad", "lalamusa", "islamabad", "sadiqabad" };
             Random random = new Random();
             for (int count = 0; count < names.Length; count++)
             {
                 //string rollNo = count.ToString() + random.Next(1, 100).ToString();
-                studentDetail.Add(new Student(Convert.ToInt32((count + 1).ToString() + random.Next(1, 100).ToString()), Convert.ToInt32((count).ToString() + random.Next(101, 200).ToString()), names[count], "$" + random.Next(3000, 7000).ToString(), addresses[count]));
+                StaffDetail.Add(new Staff(Convert.ToInt32((count + 1).ToString() + random.Next(1, 100).ToString()), Convert.ToInt32((count).ToString() + random.Next(101, 200).ToString()), names[count], "$" + random.Next(3000, 7000).ToString(), addresses[count]));
             }
 
-            return studentDetail;
+            return StaffDetail;
         }
     }
 }
